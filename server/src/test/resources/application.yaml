@@ -1,0 +1,12 @@
+micronaut:
+  security:
+    enabled: true
+    reject-not-found: false
+    intercept-url-map:
+      - pattern: /ws/chat/*
+        http-method: GET
+        access:
+          - isAuthenticated()
+  http:
+    client:
+      log-level: info
