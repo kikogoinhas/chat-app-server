@@ -5,10 +5,11 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import chat.app.server.models.Conversation;
 import chat.app.server.models.Conversation.Message;
@@ -39,6 +40,10 @@ public class PrivateChatHandlerTest {
 
     @Inject
     WebSocketClient webSocketClient;
+
+    @Container
+    public GenericContainer redis = new GenericContainer(DockerImageName.parse("redis:6-alpine"))
+            .withExposedPorts(6379);
 
     UserClient getUserClient(String conversationId, BasicAuthCredentials credentials) {
         var uri = UriBuilder

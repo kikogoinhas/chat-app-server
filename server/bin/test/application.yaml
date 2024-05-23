@@ -1,7 +1,0 @@
-micronaut:
-  security:
-    enabled: false
-    reject-not-found: false
-  http:
-    client:
-      log-level: info

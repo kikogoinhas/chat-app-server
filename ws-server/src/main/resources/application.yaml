@@ -1,0 +1,25 @@
+#Sun Apr 14 15:38:21 BST 2024
+micronaut:
+  application.name: chat-app-server
+  router:
+    static-resources:
+      default:
+        enabled: true
+        mapping: /**
+        paths: classpath:public
+  http:
+    services:
+      keycloak:
+        url: "http://localhost:8080"
+  security:
+    enabled: true
+    token:
+      jwt:
+        signatures:
+          jwks:
+            keycloak:
+              url: "/realms/chat-app/.well-known/jwks.json"
+redis:
+  uri: ${REDIS_HOST-:redis://localhost:6379}
+  io-thread-pool-size: 5
+  computation-thread-pool-size: 5

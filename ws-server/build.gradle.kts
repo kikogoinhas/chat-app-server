@@ -1,11 +1,11 @@
 plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("io.micronaut.application") version "4.3.5"
+    id("io.micronaut.test-resources") version "4.3.3"
     id("io.micronaut.aot") version "4.3.5"
 }
 
 version = "0.1"
-
 group = "chat.app.server"
 
 repositories { mavenCentral() }
@@ -19,14 +19,15 @@ dependencies {
     compileOnly("io.micronaut:micronaut-http-client")
     runtimeOnly("ch.qos.logback:logback-classic")
     runtimeOnly("org.yaml:snakeyaml")
-
     implementation("io.micrometer:context-propagation")
     implementation("io.micronaut:micronaut-websocket")
     implementation("io.micronaut.reactor:micronaut-reactor")
     implementation("io.micronaut.serde:micronaut-serde-jackson")
     implementation("io.micronaut.validation:micronaut-validation")
     implementation("io.micronaut.security:micronaut-security-jwt")
+    implementation("io.micronaut.security:micronaut-security-oauth2")
     implementation("jakarta.validation:jakarta.validation-api")
+    implementation("io.micronaut.redis:micronaut-redis-lettuce")
 
     // Test
     testAnnotationProcessor("io.micronaut:micronaut-inject-java")
@@ -72,3 +73,4 @@ micronaut {
         optimizeNetty.set(true)
     }
 }
+

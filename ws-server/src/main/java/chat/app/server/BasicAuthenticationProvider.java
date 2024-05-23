@@ -9,7 +9,7 @@ import io.micronaut.security.authentication.provider.HttpRequestAuthenticationPr
 import jakarta.inject.Singleton;
 
 @Singleton
-class AuthenticationProviderUserPassword<B> implements HttpRequestAuthenticationProvider<B> {
+class BasicAuthenticationProviderUserPassword<B> implements HttpRequestAuthenticationProvider<B> {
 
     public AuthenticationResponse authenticate(
             @Nullable HttpRequest<B> httpRequest,

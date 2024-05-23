@@ -5,5 +5,5 @@ plugins {
 
 rootProject.name = "chat-app-server"
 
-include("server")
+include("ws-server")
 
