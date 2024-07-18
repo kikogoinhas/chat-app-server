@@ -1,7 +1,6 @@
 plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("io.micronaut.application") version "4.3.5"
-    id("io.micronaut.test-resources") version "4.3.3"
     id("io.micronaut.aot") version "4.3.5"
 }
 
@@ -16,9 +15,9 @@ dependencies {
     annotationProcessor("io.micronaut.validation:micronaut-validation-processor")
     annotationProcessor("io.micronaut.security:micronaut-security-annotations")
 
-    compileOnly("io.micronaut:micronaut-http-client")
     runtimeOnly("ch.qos.logback:logback-classic")
     runtimeOnly("org.yaml:snakeyaml")
+    implementation("io.micronaut:micronaut-http-client")
     implementation("io.micrometer:context-propagation")
     implementation("io.micronaut:micronaut-websocket")
     implementation("io.micronaut.reactor:micronaut-reactor")
@@ -35,8 +34,12 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation(libs.junit.jupiter)
+    testImplementation("org.mockito:mockito-core:3.+")
     testImplementation("io.micronaut:micronaut-http-client")
     testImplementation("io.micronaut.test:micronaut-test-junit5")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers")
+    testImplementation("com.redis:testcontainers-redis:2.2.2")
     testImplementation("org.awaitility:awaitility:4.2.0")
 }
 

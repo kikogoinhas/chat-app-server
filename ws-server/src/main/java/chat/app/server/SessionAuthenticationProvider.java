@@ -13,27 +13,37 @@ import io.micronaut.security.authentication.provider.HttpRequestReactiveAuthenti
 import io.micronaut.security.token.jwt.signature.jwks.JwksSignature;
 import io.micronaut.serde.ObjectMapper;
 import io.micronaut.serde.annotation.Serdeable;
-import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.IOException;
+import javax.security.sasl.AuthenticationException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 /** SessionAuthenticationProvider */
+@Singleton
 public class SessionAuthenticationProvider<A>
     implements HttpRequestReactiveAuthenticationProvider<A> {
 
-  @Inject private StatefulRedisConnection<String, String> connection;
+  public static String COOKIE_KEY = "CHAT_APP_SID";
 
-  @Inject private ObjectMapper mapper;
+  private ObjectMapper mapper = ObjectMapper.getDefault();
 
-  @Inject private JwksSignature jwksSignature;
+  private JwksSignature jwksSignature;
+
+  private StatefulRedisConnection<String, String> connection;
+
+  public SessionAuthenticationProvider(
+      StatefulRedisConnection<String, String> connection, JwksSignature jwksSignature) {
+    this.connection = connection;
+    this.jwksSignature = jwksSignature;
+  }
 
   @Override
   public @NonNull Publisher<AuthenticationResponse> authenticate(
       @Nullable HttpRequest<A> requestContext,
       @NonNull AuthenticationRequest<String, String> authRequest) {
 
-    var cookie = requestContext.getCookies().get("CHAT_APP_SID");
+    Cookie cookie = requestContext.getCookies().get(COOKIE_KEY);
 
     if (cookie == null) {
       return Mono.just(AuthenticationResponse.failure());
@@ -43,9 +53,9 @@ public class SessionAuthenticationProvider<A>
         .map(Session::accessToken)
         .flatMap(this::validateToken)
         .flatMap(this::getUsername)
+        .log()
         .map(AuthenticationResponse::success)
-        .or(Mono.just(AuthenticationResponse.failure()))
-        .log();
+        .or(Mono.just(AuthenticationResponse.failure()));
   }
 
   private Mono<Session> getSessionValue(Cookie cookie) {
@@ -53,14 +63,15 @@ public class SessionAuthenticationProvider<A>
 
     return Mono.fromCompletionStage(() -> commands.get(cookie.getValue()))
         .flatMap(
-            value -> {
-              try {
-                return Mono.just(mapper.readValue(value, Session.class));
-              } catch (IOException e) {
-                e.printStackTrace();
-                return Mono.error(AuthenticationResponse.exception(e.getMessage()));
-              }
-            });
+            value ->
+                Mono.deferContextual(
+                    ctx -> {
+                      try {
+                        return Mono.just(mapper.readValue(value, Session.class));
+                      } catch (IOException e) {
+                        return Mono.error(AuthenticationResponse.exception(e.getMessage()));
+                      }
+                    }));
   }
 
   private Mono<SignedJWT> validateToken(String accessToken) {
@@ -71,7 +82,7 @@ public class SessionAuthenticationProvider<A>
         return Mono.just(signedJWT);
       }
 
-      return Mono.empty();
+      return Mono.error(new AuthenticationException("JWT Signature not valid"));
     } catch (Exception e) {
       return Mono.error(AuthenticationResponse.exception(e.getMessage()));
     }
@@ -79,7 +90,7 @@ public class SessionAuthenticationProvider<A>
 
   private Mono<String> getUsername(SignedJWT jwt) {
     try {
-      return Mono.just((String) jwt.getPayload().toJSONObject().get("email"));
+      return Mono.just((String) jwt.getPayload().toJSONObject().get("email")).log();
     } catch (Exception e) {
       return Mono.error(AuthenticationResponse.exception(e.getMessage()));
     }

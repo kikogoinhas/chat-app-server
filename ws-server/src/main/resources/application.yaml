@@ -1,6 +1,7 @@
 #Sun Apr 14 15:38:21 BST 2024
 micronaut:
   application.name: chat-app-server
+  server.port: 8081
   router:
     static-resources:
       default:
@@ -20,6 +21,6 @@ micronaut:
             keycloak:
               url: "/realms/chat-app/.well-known/jwks.json"
 redis:
-  uri: ${REDIS_HOST-:redis://localhost:6379}
+  uri: redis://localhost:6379
   io-thread-pool-size: 5
   computation-thread-pool-size: 5
